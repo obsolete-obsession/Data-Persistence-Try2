@@ -8,6 +8,8 @@ public class DataManager : MonoBehaviour
 
     //save data
     public static string Name;
+    public static string HighScoreName;
+    public static int HighScore;
     
     private void Awake()
     {

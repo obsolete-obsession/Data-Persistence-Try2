@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using System.IO;
 
 public class MainManager : MonoBehaviour
 {
@@ -19,7 +20,12 @@ public class MainManager : MonoBehaviour
     
     private bool m_GameOver = false;
 
-    
+    private void Awake()
+    {
+        LoadHighScoreData();
+        DataText.text = "High Score: " + DataManager.HighScore + " Name: " + DataManager.HighScoreName;
+    }
+
     // Start is called before the first frame update
     void Start()
     {
@@ -38,7 +44,7 @@ public class MainManager : MonoBehaviour
             }
         }
 
-        DataText.text = "High Score: " + " Name: " + DataManager.Name;
+        
     }
 
     private void Update()
@@ -74,6 +80,48 @@ public class MainManager : MonoBehaviour
     public void GameOver()
     {
         m_GameOver = true;
+        if(m_Points >= DataManager.HighScore)
+        {
+            DataManager.HighScore = m_Points;
+            DataManager.HighScoreName = DataManager.Name;
+            SaveHighScoreData();
+        }
         GameOverText.SetActive(true);
+    }
+
+    [System.Serializable]
+    public class SaveData
+    {
+        public string HighScoreName;
+        public int HighScore;
+
+
+    }
+
+    public void SaveHighScoreData()
+    {
+        SaveData saveData = new SaveData();
+
+        saveData.HighScoreName = DataManager.HighScoreName;
+        saveData.HighScore = DataManager.HighScore;
+
+        string jsonData = JsonUtility.ToJson(saveData);
+
+        File.WriteAllText(Application.persistentDataPath + "/savefile.json", jsonData);
+        
+    }
+
+    public void LoadHighScoreData()
+    {
+        if(File.Exists(Application.persistentDataPath + "/savefile.json"))
+        {
+            
+            string jsonData = File.ReadAllText(Application.persistentDataPath + "/savefile.json");
+
+            SaveData saveData = JsonUtility.FromJson<SaveData>(jsonData);
+
+            DataManager.HighScoreName = saveData.HighScoreName;
+            DataManager.HighScore = saveData.HighScore;
+        }
     }
 }
